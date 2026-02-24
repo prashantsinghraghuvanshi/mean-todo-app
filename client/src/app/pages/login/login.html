@@ -3,6 +3,8 @@
     <h2 class="text-3xl font-bold text-white mb-6 text-center">Login</h2>
 
     <form (ngSubmit)="onLogin()" class="space-y-4">
+      <div *ngIf="success" class="p-2 bg-green-600 text-white rounded">{{ success }}</div>
+      <div *ngIf="error" class="p-2 bg-red-600 text-white rounded">{{ error }}</div>
       <div>
         <label class="text-gray-300">Email</label>
         <input type="email"
@@ -23,8 +25,15 @@
 
       <button type="submit"
               class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg font-semibold transition">
-        Login
+        <span *ngIf="!loading">Login</span>
+        <span *ngIf="loading">Logging in...</span>
       </button>
     </form>
+
+    <div class="mt-6 text-center">
+      <p class="text-gray-400">Don't have an account? 
+        <a routerLink="/register" class="text-green-500 hover:text-green-400 font-semibold">Register here</a>
+      </p>
+    </div>
   </div>
 </div>
