@@ -33,4 +33,21 @@ export class ApiService {
   register(body: { name?: string; email: string; password: string }) {
     return this.post('/auth/register', body);
   }
+
+  // Todos API
+  getTodos() {
+    return this.get<any[]>('/todos');
+  }
+
+  createTodo(title: string) {
+    return this.post('/todos', { title });
+  }
+
+  deleteTodo(id: number) {
+    return this.delete(`/todos/${id}`);
+  }
+
+  updateTodo(id: number, completed: boolean) {
+    return this.put(`/todos/${id}`, { completed });
+  }
 }

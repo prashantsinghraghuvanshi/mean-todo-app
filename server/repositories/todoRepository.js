@@ -20,3 +20,11 @@ exports.deleteTodo = async (userId, todoId) => {
   );
   return result.rowCount > 0;
 };
+
+exports.updateTodo = async (userId, todoId, completed) => {
+  const result = await db.query(
+    'UPDATE todos SET completed = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+    [completed, todoId, userId]
+  );
+  return result.rows[0];
+};

@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center">
+<div class="min-h-screen bg-gray-900 text-white flex flex-col items-center py-10">
   <div class="absolute top-4 right-4">
     <button (click)="logout()" 
             class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition">
@@ -6,20 +6,26 @@
     </button>
   </div>
 
-  <h1 class="text-5xl font-bold mb-6">Welcome to My App 🚀</h1>
-  <p class="text-lg text-gray-300 mb-8">
-    You are successfully logged in!
-  </p>
+  <h1 class="text-4xl font-bold mb-4">Your Todos</h1>
 
-  <div class="space-x-4">
-    <a routerLink="/login"
-       class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition">
-      Login
-    </a>
+  <form (ngSubmit)="addTodo()" class="flex gap-2 mb-6">
+    <input [(ngModel)]="newTitle" name="newTitle" placeholder="Add new todo..."
+           class="px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-semibold">Add</button>
+  </form>
 
-    <a routerLink="/register"
-       class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition">
-      Register
-    </a>
-  </div>
+  <div *ngIf="success" class="mb-2 p-2 bg-green-600 text-white rounded">{{ success }}</div>
+  <div *ngIf="error" class="mb-2 p-2 bg-red-600 text-white rounded">{{ error }}</div>
+  <div *ngIf="loading" class="mb-2">Loading...</div>
+
+  <ul class="w-full max-w-xl">
+    <li *ngFor="let todo of todos" class="flex items-center justify-between bg-gray-800 rounded-lg px-4 py-3 mb-2">
+      <div class="flex items-center gap-3">
+        <input type="checkbox" [checked]="todo.completed" (change)="toggleCompleted(todo)"
+               class="accent-green-500 w-5 h-5">
+        <span [class.line-through]="todo.completed" class="text-lg">{{ todo.title }}</span>
+      </div>
+      <button (click)="deleteTodo(todo)" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Delete</button>
+    </li>
+  </ul>
 </div>
