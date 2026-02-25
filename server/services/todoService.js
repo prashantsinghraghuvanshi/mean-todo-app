@@ -4,14 +4,14 @@ exports.getAllTodos = async (userId) => {
   return todoRepository.getAllTodos(userId);
 };
 
-exports.createTodo = async (userId, title) => {
-  return todoRepository.createTodo(userId, title);
+exports.createTodo = async (userId, title, description, due_date) => {
+  return todoRepository.createTodo(userId, title, description, due_date);
 };
 
 exports.deleteTodo = async (userId, todoId) => {
   return todoRepository.deleteTodo(userId, todoId);
 };
 
-exports.updateTodo = async (userId, todoId, completed) => {
-  return todoRepository.updateTodo(userId, todoId, completed);
+exports.updateTodo = async (userId, todoId, updates) => {
+  return todoRepository.updateTodo(userId, todoId, updates);
 };

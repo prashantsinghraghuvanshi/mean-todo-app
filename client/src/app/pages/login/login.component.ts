@@ -35,8 +35,9 @@ export class LoginComponent {
         const token = (res as any).token ?? (res as any).accessToken ?? null;
         if (token) {
           this.auth.setToken(token);
+          console.log('JWT token after login:', token);
           this.success = 'Login successful';
-          this.router.navigate(['/']);
+          this.router.navigate(['/'], { state: { refreshTodos: true } });
         } else {
           this.error = 'Login succeeded but no token returned';
         }

@@ -37,7 +37,7 @@ export class RegisterComponent {
         if (token) {
           this.auth.setToken(token);
           this.success = 'Registration successful';
-          this.router.navigate(['/']);
+          this.router.navigate(['/'], { state: { refreshTodos: true } });
         } else {
           this.success = 'Registration successful — please log in';
         }

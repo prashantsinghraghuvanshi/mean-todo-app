@@ -8,24 +8,127 @@
 
   <h1 class="text-4xl font-bold mb-4">Your Todos</h1>
 
-  <form (ngSubmit)="addTodo()" class="flex gap-2 mb-6">
-    <input [(ngModel)]="newTitle" name="newTitle" placeholder="Add new todo..."
-           class="px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-    <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-semibold">Add</button>
-  </form>
+  <!-- Create Todo Button -->
+  <button (click)="openModal()" 
+          class="mb-6 px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition">
+    + Create Todo
+  </button>
+
+  <!-- Search Bar -->
+  <div class="mb-6 w-full max-w-2xl">
+    <input [(ngModel)]="searchQuery" (input)="onSearchChange()" 
+           placeholder="Search todos by title..."
+           class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+  </div>
 
   <div *ngIf="success" class="mb-2 p-2 bg-green-600 text-white rounded">{{ success }}</div>
-  <div *ngIf="error" class="mb-2 p-2 bg-red-600 text-white rounded">{{ error }}</div>
+  <div *ngIf="error && filteredTodos.length" class="mb-2 p-2 bg-red-600 text-white rounded">{{ error }}</div>
   <div *ngIf="loading" class="mb-2">Loading...</div>
 
-  <ul class="w-full max-w-xl">
-    <li *ngFor="let todo of todos" class="flex items-center justify-between bg-gray-800 rounded-lg px-4 py-3 mb-2">
-      <div class="flex items-center gap-3">
-        <input type="checkbox" [checked]="todo.completed" (change)="toggleCompleted(todo)"
-               class="accent-green-500 w-5 h-5">
-        <span [class.line-through]="todo.completed" class="text-lg">{{ todo.title }}</span>
-      </div>
-      <button (click)="deleteTodo(todo)" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Delete</button>
-    </li>
-  </ul>
+  <!-- Two Column Layout for In Progress and Completed -->
+  <div class="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- In Progress Component -->
+    <app-in-progress-todos 
+      [todos]="inProgressTodos"
+      (toggleCompleted)="toggleCompleted($event)"
+      (delete)="deleteTodo($event)"
+      (edit)="openEditModal($event)">
+    </app-in-progress-todos>
+
+    <!-- Completed Component -->
+    <app-completed-todos 
+      [todos]="completedTodos"
+      (toggleCompleted)="toggleCompleted($event)"
+      (delete)="deleteTodo($event)"
+      (edit)="openEditModal($event)">
+    </app-completed-todos>
+  </div>
+
+  <div *ngIf="!loading && filteredTodos.length === 0 && todos.length > 0" class="text-center text-gray-400 mt-4">
+    No todos match your search
+  </div>
+
+  <!-- Modal -->
+  <div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+      <h2 class="text-2xl font-bold mb-4">Create New Todo</h2>
+      
+      <form (ngSubmit)="addTodoFromModal()">
+        <!-- Title Field -->
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-2">Title *</label>
+          <input [(ngModel)]="formData.title" name="title" placeholder="Enter todo title"
+                 class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                 required>
+        </div>
+
+        <!-- Description Field -->
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-2">Description</label>
+          <textarea [(ngModel)]="formData.description" name="description" placeholder="Enter description (optional)"
+                    class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows="3"></textarea>
+        </div>
+
+        <!-- Due Date Field -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold mb-2">Due Date</label>
+          <input type="date" [(ngModel)]="formData.due_date" name="due_date"
+                 class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3">
+          <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-semibold transition">
+            Create Todo
+          </button>
+          <button type="button" (click)="closeModal()" class="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded font-semibold transition">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div *ngIf="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+      <h2 class="text-2xl font-bold mb-4">Edit Todo</h2>
+      
+      <form (ngSubmit)="saveEditTodo()">
+        <!-- Title Field -->
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-2">Title *</label>
+          <input [(ngModel)]="editFormData.title" name="editTitle" placeholder="Enter todo title"
+                 class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                 required>
+        </div>
+
+        <!-- Description Field -->
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-2">Description</label>
+          <textarea [(ngModel)]="editFormData.description" name="editDescription" placeholder="Enter description (optional)"
+                    class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows="3"></textarea>
+        </div>
+
+        <!-- Due Date Field -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold mb-2">Due Date</label>
+          <input type="date" [(ngModel)]="editFormData.due_date" name="editDueDate"
+                 class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3">
+          <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-semibold transition">
+            Save Changes
+          </button>
+          <button type="button" (click)="closeEditModal()" class="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded font-semibold transition">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

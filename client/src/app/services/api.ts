@@ -35,19 +35,26 @@ export class ApiService {
   }
 
   // Todos API
-  getTodos() {
-    return this.get<any[]>('/todos');
+  getTodos(userId?: number) {
+    return this.get<any[]>(`/todos?userId=${userId}`);
   }
 
-  createTodo(title: string) {
-    return this.post('/todos', { title });
+  createTodo(title: string, description?: string, due_date?: string, userId?: number) {
+    return this.post('/todos', { title, description, due_date, userId });
   }
 
-  deleteTodo(id: number) {
-    return this.delete(`/todos/${id}`);
+  deleteTodo(id: number, userId?: number) {
+    // Send userId in body for DELETE
+    return this.http.request('delete', `${this.base}/todos/${id}`, { body: { userId } });
   }
 
-  updateTodo(id: number, completed: boolean) {
-    return this.put(`/todos/${id}`, { completed });
+  // toggle completed and incomplete
+  updateTodo(id: number, completed: boolean, title: string, userId?: number) {
+    return this.put(`/todos/${id}`, { completed, userId, title });
+  }
+
+  // Edit todo with all fields
+  editTodo(id: number, title: string, description?: string, due_date?: string, userId?: number) {
+    return this.put(`/todos/${id}`, { title, description, due_date, userId });
   }
 }
